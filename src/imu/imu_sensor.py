@@ -80,7 +80,7 @@ class IMU_Sensor:
 
         print ("Gx=%.2f" %Gx, u'\u00b0'+ "/s", "\tGy=%.2f" %Gy, u'\u00b0'+ "/s", "\tGz=%.2f" %Gz, u'\u00b0'+ "/s", "\tAx=%.2f g" %Ax, "\tAy=%.2f g" %Ay, "\tAz=%.2f g" %Az)
     
-    def calibrateGyro(self, n=100.0):
+    def calibrateGyroscope(self, n=100):
         print("Calibrating gyro, make sure bot is level!")
 
         gyro_x = 0.0
@@ -100,7 +100,7 @@ class IMU_Sensor:
         print("Gyroscope Calibration complete!")
         print("raw gyro offsets: x = %.2f" %self.gyro_offsets[0], "\ty = %.2f" %self.gyro_offsets[1], "\tz = %.2f" %self.gyro_offsets[2]) 
 
-    def calibrateAccel(self, n=100.0):
+    def calibrateAccelerometer(self, n=100):
         print("Accelerometer gyro, make sure bot is level!")
         accel_x = 0.0
         accel_y = 0.0
@@ -122,7 +122,9 @@ class IMU_Sensor:
               
 
 if __name__ == "__main__":
-     imu_obj = IMU_Sensor()
-     while True:
-          imu_obj.printRawData()
-          sleep(1)
+    imu_obj = IMU_Sensor()
+    imu_obj.calibrateGyroscope()
+    imu_obj.calibrateAccelerometer()
+    while True:
+        imu_obj.printRawData()
+        sleep(1)
