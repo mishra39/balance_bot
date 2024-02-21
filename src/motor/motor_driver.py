@@ -1,22 +1,24 @@
-from gpiozero import DigitalOutputDevice, PWMOutputDevice
+from gpiozero import DigitalOutputDevice, PWMOutputDevice, RotaryEncoder, Motor
 from time import sleep, time
 
 # Set up motor control
-# Motor 1
-motor1_pwm = PWMOutputDevice("BOARD12")
-motor1_direction_1 = DigitalOutputDevice("BOARD16")
-motor1_direction_2 = DigitalOutputDevice("BOARD18")
+# Motor Left
+motorL_pwm = 18 #PWMOutputDevice("BOARD12")
+motorL_direction_1 = 23 #DigitalOutputDevice("BOARD16")
+motorL_direction_2 = 24 #DigitalOutputDevice("BOARD18")
+
+#rotor = RotaryEncoder(16, 20, wrap=True, max_steps=) # BOARD36, BOARD38 
 
 stdby = DigitalOutputDevice("BOARD22")
 
 # Motor 2
-motor2_pwm = PWMOutputDevice("BOARD11")
-motor2_direction_1 = DigitalOutputDevice("BOARD15")
-motor2_direction_2 = DigitalOutputDevice("BOARD13")
+motorR_pwm = PWMOutputDevice("BOARD11")
+motorR_direction_1 = DigitalOutputDevice("BOARD15")
+motorR_direction_2 = DigitalOutputDevice("BOARD13")
 
 class MotorDriver:
 	def __init__(self) -> None:
-		pass
+		self.motorL = Motor(forward=motorL_direction_1, backward=motorL_direction_2, pwm=motorL_pwm)
 	def forward(self, spd):
 		print("Forward Speed: " + str(spd))
 		self.runMotor(spd, 0)
@@ -29,33 +31,28 @@ class MotorDriver:
 		print("runMotor()")
 		stdby.on()
 		if (dir==1):
-			motor1_direction_1.off()
-			motor1_direction_2.on()
-			motor2_direction_1.off()
-			motor2_direction_2.on()
+			self.motorL.forward()
+			motorR_direction_1.off()
+			motorR_direction_2.on()
 		else:
-			motor1_direction_1.on()
-			motor1_direction_2.off()
-			motor2_direction_1.on()
-			motor2_direction_2.off()
+			self.motorL.backward()
+			motorR_direction_1.on()
+			motorR_direction_2.off()
 
-		motor1_pwm.blink(spd,1-spd)
-		motor2_pwm.blink(spd,1-spd)
+		# motorL_pwm.blink(spd,1-spd)
+		motorR_pwm.blink(spd,1-spd)
 
 	def motorStop(self):
 		print("Stop Motor")
 		stdby.off()
+		self.motorL.stop()
 
 	def __del__(self):
 		print("Deleting motor")
-		# Motor 1 close
-		motor1_pwm.close()
-		motor1_direction_1.close()
-		motor1_direction_2.close()
-		# Motor 2 close
-		motor2_pwm.close()
-		motor2_direction_1.close()
-		motor2_direction_2.close()
+		self.motorStop()
+		motorR_pwm.close()
+		motorR_direction_1.close()
+		motorR_direction_2.close()
 
 def main(args=None):
 	motor_driver = MotorDriver()
