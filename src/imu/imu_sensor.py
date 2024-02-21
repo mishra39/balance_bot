@@ -1,6 +1,7 @@
 import smbus					#import SMBus module of I2C
 from time import sleep          #import
 import numpy as np
+import math
 
 #some MPU6050 Registers and their Address
 PWR_MGMT_1   = 0x6B
@@ -21,8 +22,8 @@ Device_Address = 0x68   # MPU6050 device address
 class IMU_Sensor:
     def __init__(self) -> None:
         self.imu_name = "MPU6050"
-        self.gyro_offsets = np.zeros([3,1])
-        self.accel_offsets = np.zeros([3,1])
+        self.raw_gyro_calib_offset = np.zeros([3,1])
+        self.raw_accel_calib_offset = np.zeros([3,1])
         self.MPU_Init()
 
     def MPU_Init(self):        
@@ -54,7 +55,48 @@ class IMU_Sensor:
                 value = value - 65536
         return value
 
+    
+    # Returns aceeleration
+    def getAccelCorrected(self) -> np.ndarray:
+        # Read Accelerometer raw value
+        acc_x = self.read_raw_data(ACCEL_XOUT_H)
+        acc_y = self.read_raw_data(ACCEL_YOUT_H)
+        acc_z = self.read_raw_data(ACCEL_ZOUT_H)
+        
+        # Full scale range +/- 250 degree/C as per sensitivity scale factor
+        accel_corrected = np.zeros([3,1])
+        accel_corrected[0] = acc_x - self.raw_accel_calib_offset[0] / 16384.0
+        accel_corrected[1] = acc_y - self.raw_accel_calib_offset[1] / 16384.0
+        accel_corrected[2] = acc_z - self.raw_accel_calib_offset[2] / 16384.0
+        
+        return accel_corrected
+    
+    # Returns angular velocity
+    def getGyroCorrected(self) -> np.ndarray:
+        # Read Accelerometer raw value
+        gyro_x = self.read_raw_data(GYRO_XOUT_H)
+        gyro_y = self.read_raw_data(GYRO_YOUT_H)
+        gyro_z = self.read_raw_data(GYRO_ZOUT_H)
+        
+        # Full scale range +/- 250 degree/C as per sensitivity scale factor
+        gyro_corrected = np.zeros([3,1])
+        gyro_corrected[0] = acc_x - self.raw_gyro_calib_offset[0] / 131.0
+        gyro_corrected[1] = acc_y - self.raw_gyro_calib_offset[1] / 131.0
+        gyro_corrected[2] = acc_z - self.raw_gyro_calib_offset[2] / 131.0
+        
+        return gyro_corrected
 
+    # compute roll and pitch using gyro and accelerometer
+    def calcRollandPitch(self):
+        accel = self.getAccelCorrected()
+        # Calculate pitch angle (θ)
+        accel_pitch = math.atan2(accel[0] / 9.8, accel[2] / 9.8) / (2 * math.pi) * 360
+        # Calculate roll angle (φ)
+        accel_roll = math.atan2(accel[1] / 9.8, accel[2] / 9.8) / (2 * math.pi) * 360
+        
+        print("Pitch (θ) = %.2f" %accel_pitch + " rad", "\tRoll (φ) = %.2f" %accel_roll + " rad")
+        
+        
     def printRawData(self) -> None:
         print (" Reading Data of Gyroscope and Accelerometer")
         
@@ -98,7 +140,7 @@ class IMU_Sensor:
         self.gyro_offsets = np.array([gyro_x/n, gyro_y/n, gyro_z/n])
 
         print("Gyroscope Calibration complete!")
-        print("raw gyro offsets: x = %.2f" %self.gyro_offsets[0], "\ty = %.2f" %self.gyro_offsets[1], "\tz = %.2f" %self.gyro_offsets[2]) 
+        print("raw gyro offsets: x = %.2f" %self.gyro_offsets[0], "\ty = %.2f" %self.gyro_offsets[1], "\tz = %.2f" %self.gyro_offsets[2])
 
     def calibrateAccelerometer(self, n=100):
         print("Accelerometer gyro, make sure bot is level!")
@@ -126,5 +168,5 @@ if __name__ == "__main__":
     imu_obj.calibrateGyroscope()
     imu_obj.calibrateAccelerometer()
     while True:
-        imu_obj.printRawData()
+        imu_obj.calcRollandPitch()
         sleep(1)
