@@ -18,7 +18,7 @@ motorR_direction_2 = DigitalOutputDevice("BOARD13")
 
 class MotorDriver:
 	def __init__(self) -> None:
-		self.motorL = Motor(forward=motorL_direction_1, backward=motorL_direction_2, pwm=motorL_pwm)
+		self.motorL = Motor(forward=motorL_direction_1, backward=motorL_direction_2, enable=25)
 	def forward(self, spd):
 		print("Forward Speed: " + str(spd))
 		self.runMotor(spd, 0)
