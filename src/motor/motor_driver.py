@@ -18,24 +18,25 @@ motorR_direction_2 = DigitalOutputDevice("BOARD13")
 
 class MotorDriver:
 	def __init__(self) -> None:
-		self.motorL = Motor(forward=motorL_direction_1, backward=motorL_direction_2, enable=25)
+		self.motorL = Motor(motorL_direction_1, motorL_direction_2)
+
 	def forward(self, spd):
 		print("Forward Speed: " + str(spd))
+		self.motorL.forward(spd)
 		self.runMotor(spd, 0)
 
 	def reverse(self, spd):
 		print("Reverse Speed: " + str(spd))
+		self.motorL.backward()
 		self.runMotor(spd, 1)
 
 	def runMotor(self, spd, dir):
 		print("runMotor()")
 		stdby.on()
 		if (dir==1):
-			self.motorL.forward()
 			motorR_direction_1.off()
 			motorR_direction_2.on()
 		else:
-			self.motorL.backward()
 			motorR_direction_1.on()
 			motorR_direction_2.off()
 
