@@ -25,34 +25,47 @@ motorR_direction_1 = DigitalOutputDevice(BIN1) # "BOARD15"
 motorR_direction_2 = DigitalOutputDevice(BIN2) # "BOARD13"
 
 # Encoder
-encoder_counts_per_rev = 780.0 # pulses per revolution
-encoder_a = RotaryEncoder(ENCAA, ENCBA, max_steps=0) # BOARD36, BOARD38 
+encoder_counts_per_rev = 285.0 # pulses per revolution
+
 
 class MotorDriver:
 	def __init__(self) -> None:
-		pass
-
-	def forward(self, spd):
-		print("Forward Speed: " + str(spd))
-		self.runMotor(spd, 0)
-
-	def reverse(self, spd):
-		print("Reverse Speed: " + str(spd))
-		self.runMotor(spd, 1)
-
-	def runMotor(self, spd, dir):
+		self.speed_rpm = 0.0
+		self.angle_curr = 0.0
+		self.prev_time = time()
+		self.encoder_a = RotaryEncoder(ENCAA, ENCBA, max_steps=400) # BOARD36, BOARD38
+		self.encoder_a.when_rotated = self.updateSpeed
+		
+	def drive(self, spd):
 		print("runMotor()")
+		# Clamp to [-1,1]
+		if spd > 1:
+			spd = 1
+		elif spd < -1:
+			spd = -1
+		if (spd > 0):
+			dir = 1
+		elif (spd < 0):
+			dir = -1
+		
 		stdby.on()
+		# Drive forward
 		if (dir==1):
+			print("Forward Speed: " + str(spd))
 			motorR_direction_1.off()
 			motorR_direction_2.on()
-			motorL_direction_1.on()
-			motorL_direction_2.off()
-		else:
-			motorR_direction_1.on()
-			motorR_direction_2.off()
 			motorL_direction_1.off()
 			motorL_direction_2.on()
+			motorL_pwm.value = spd
+			motorR_pwm.value = spd
+		else:
+			print("Reverse Speed: " + str(spd))
+			motorR_direction_1.on()
+			motorR_direction_2.off()
+			motorL_direction_1.on()
+			motorL_direction_2.off()
+			motorL_pwm.value = spd
+			motorR_pwm.value = spd
 
 		motorL_pwm.blink(spd,1-spd)
 		motorR_pwm.blink(spd,1-spd)
@@ -62,8 +75,22 @@ class MotorDriver:
 		stdby.off()
 
 	def printEncoder(self):
-		angle_curr = 360.0 / encoder_counts_per_rev * encoder_a.steps
-		print("Angle = %.2f" %angle_curr)
+		print("Angle = %.2f" %self.angle_curr, u'\u00b0')
+		print("Speed = %.2f" %self.speed_rpm + "RPM")
+		
+	
+	def updateSpeed(self):
+		#print("Encoder val = %.2f" %self.encoder_a.steps)
+		curr_time = time()
+		dt = curr_time - self.prev_time
+		self.prev_time = curr_time
+		
+		# Compute motor speed
+		self.angle_curr = (360.0 / encoder_counts_per_rev) * self.encoder_a.steps
+		self.speed_rpm = self.angle_curr * (60.0 / dt)
+		
+		
+		
 		
 	def __del__(self):
 		print("Deleting motor")
@@ -79,8 +106,8 @@ def main(args=None):
 	motor_driver = MotorDriver()
 	try:
 		while True:
-			sleep(0.02)
-			motor_driver.forward(0.8)
+			sleep(0.5)
+			motor_driver.drive(0.8)
 			motor_driver.printEncoder()
 			
 	except KeyboardInterrupt:
