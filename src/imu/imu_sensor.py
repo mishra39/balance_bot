@@ -129,18 +129,20 @@ class IMU_Sensor:
         
         print ("Gx=%.2f" %gyro_corrected[0], u'\u00b0'+ "/s", "\tGy=%.2f" %gyro_corrected[1], u'\u00b0'+ "/s", "\tGz=%.2f" %gyro_corrected[2], u'\u00b0'+ "/s", "\tAx=%.2f g" %accel_corrected[0], "\tAy=%.2f g" %accel_corrected[1], "\tAz=%.2f g" %accel_corrected[2])
         
-    def calibrateGyroscope(self, n=100):
+    def calibrateGyroscope(self, n=15.0):
         print("Calibrating gyro, make sure bot is level!")
-
+        print("Starting gyro calibration for %.2f seconds." %n)
         gyro_x = 0.0
         gyro_y = 0.0
         gyro_z = 0.0
-
-        # get sum of n gyro values
-        for i in range(n):
+        
+        t_start = time()
+        t_elapsed = 0.0
+        while (t_elapsed < n):
             gyro_x += self.read_raw_data(GYRO_XOUT_H)
             gyro_y += self.read_raw_data(GYRO_YOUT_H)
             gyro_z += self.read_raw_data(GYRO_ZOUT_H)
+            t_elapsed = time() - t_start
         
         
         # compute average error
@@ -155,17 +157,20 @@ class IMU_Sensor:
         # Clear all axis
         uncal_gyro.cla()
         
-    def calibrateAccelerometer(self, n=100):
+    def calibrateAccelerometer(self, n=15.0):
         print("Accelerometer gyro, make sure bot is level!")
+        print("Starting accelerometer calibration for %.2f seconds." %n)
         accel_x = 0.0
         accel_y = 0.0
         accel_z = 0.0
 
-        # get sum of n accel values
-        for i in range(n):
+        t_start = time()
+        t_elapsed = 0.0
+        while (t_elapsed < n):
             accel_x += self.read_raw_data(ACCEL_XOUT_H)
             accel_y += self.read_raw_data(ACCEL_YOUT_H)
             accel_z += self.read_raw_data(ACCEL_ZOUT_H)
+            t_elapsed = time() - t_start
         
         
         # compute average error
@@ -213,8 +218,8 @@ class IMU_Sensor:
 
 if __name__ == "__main__":
     imu_obj = IMU_Sensor()
-    imu_obj.calibrateGyroscope(1000)
-    imu_obj.calibrateAccelerometer(1000)
+    imu_obj.calibrateGyroscope(30.0)
+    imu_obj.calibrateAccelerometer(30.0)
     if imu_obj.visualize:
             imu_obj.plot_calibration_results()
     while True:
