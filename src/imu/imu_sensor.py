@@ -131,7 +131,7 @@ class IMU_Sensor:
         
     def calibrateGyroscope(self, t=15.0):
         print("Calibrating gyro, make sure bot is level!")
-        print("Starting gyro calibration for %.2f seconds." %n)
+        print("Starting gyro calibration for %.2f seconds." %t)
         gyro_x = 0.0
         gyro_y = 0.0
         gyro_z = 0.0
@@ -161,7 +161,7 @@ class IMU_Sensor:
         
     def calibrateAccelerometer(self, t=15.0):
         print("Accelerometer gyro, make sure bot is level!")
-        print("Starting accelerometer calibration for %.2f seconds." %n)
+        print("Starting accelerometer calibration for %.2f seconds." %t)
         accel_x = 0.0
         accel_y = 0.0
         accel_z = 0.0
