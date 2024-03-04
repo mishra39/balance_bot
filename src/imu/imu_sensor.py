@@ -23,7 +23,7 @@ bus = smbus.SMBus(1) 	# or bus = smbus.SMBus(0) for older version boards
 Device_Address = 0x68   # MPU6050 device address
         
 class IMU_Sensor:
-    def __init__(self) -> None:
+    def __init__(self, calibrate=False) -> None:
         self.imu_name = "MPU6050"
         self.raw_gyro_calib_offset = np.zeros([3,1])
         self.raw_accel_calib_offset = np.zeros([3,1])
@@ -34,7 +34,18 @@ class IMU_Sensor:
         self.curr_time = time.time()
         self.pitch_gyro_old = 0.0
         self.roll_gyro_old = 0.0
+        self.calib_dur = 30.0 # Calibration time for gyro and imu
+        self.pitch_filtered = 0.0
+        self.roll_filtered = 0.0
         self.MPU_Init()
+
+        if (calibrate is True):
+            self.calibrateAccelerometer(self.calib_dur)
+            self.calibrateGyroscope(self.calib_dur)
+        else: # TODO: read offsets from file
+            self.accel_offsets = np.array([205.55, 1131.36, 1812.30])
+            self.gyro_offsets = np.array([-55.12, -4.61, -41.07])
+
 
     def MPU_Init(self):        
         #write to sample rate register
@@ -214,11 +225,16 @@ class IMU_Sensor:
         
         # Complementary Filter
         alpha = 0.85
-        pitch_filtered = alpha * accel_pitch_new  + (1-alpha) * pitch_gyro
-        roll_filtered = alpha * accel_roll_new + (1-alpha) * roll_gyro
+        self.pitch_filtered = alpha * accel_pitch_new  + (1-alpha) * pitch_gyro
+        self.roll_filtered = alpha * accel_roll_new + (1-alpha) * roll_gyro
         
-        print("Pitch (θ) = %.2f" %pitch_filtered, u'\u00b0', "\tRoll (φ) = %.2f" %roll_filtered, u'\u00b0')
-        
+        print("Pitch (θ) = %.2f" %self.pitch_filtered, u'\u00b0', "\tRoll (φ) = %.2f" %self.roll_filtered, u'\u00b0')
+    
+    def getPitch(self) -> float:
+        self.calcRollandPitch()
+
+        return self.pitch_filtered
+
 
 if __name__ == "__main__":
     imu_obj = IMU_Sensor()

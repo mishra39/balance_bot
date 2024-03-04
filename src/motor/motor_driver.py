@@ -52,18 +52,18 @@ class MotorDriver:
 		# Drive forward
 		if (dir==1):
 			print("Forward Speed: " + str(spd))
-			motorR_direction_1.off()
-			motorR_direction_2.on()
-			motorL_direction_1.off()
-			motorL_direction_2.on()
-			motorL_pwm.value = spd
-			motorR_pwm.value = spd
-		else:
-			print("Reverse Speed: " + str(spd))
 			motorR_direction_1.on()
 			motorR_direction_2.off()
 			motorL_direction_1.on()
 			motorL_direction_2.off()
+			motorL_pwm.value = spd
+			motorR_pwm.value = spd
+		else:
+			print("Reverse Speed: " + str(spd))
+			motorR_direction_1.off()
+			motorR_direction_2.on()
+			motorL_direction_1.off()
+			motorL_direction_2.on()
 			motorL_pwm.value = spd
 			motorR_pwm.value = spd
 
