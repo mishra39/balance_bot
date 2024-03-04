@@ -1,5 +1,5 @@
 import smbus					#import SMBus module of I2C
-from time import time, sleep          #import
+from time import sleep          #import
 import numpy as np
 import math
 import matplotlib.pyplot as plt
@@ -136,13 +136,13 @@ class IMU_Sensor:
         gyro_y = 0.0
         gyro_z = 0.0
         
-        t_start = time()
+        t_start = time.time()
         t_elapsed = 0.0
         while (t_elapsed < n):
             gyro_x += self.read_raw_data(GYRO_XOUT_H)
             gyro_y += self.read_raw_data(GYRO_YOUT_H)
             gyro_z += self.read_raw_data(GYRO_ZOUT_H)
-            t_elapsed = time() - t_start
+            t_elapsed = time.time() - t_start
         
         
         # compute average error
@@ -164,13 +164,13 @@ class IMU_Sensor:
         accel_y = 0.0
         accel_z = 0.0
 
-        t_start = time()
+        t_start = time.time()
         t_elapsed = 0.0
         while (t_elapsed < n):
             accel_x += self.read_raw_data(ACCEL_XOUT_H)
             accel_y += self.read_raw_data(ACCEL_YOUT_H)
             accel_z += self.read_raw_data(ACCEL_ZOUT_H)
-            t_elapsed = time() - t_start
+            t_elapsed = time.time() - t_start
         
         
         # compute average error
