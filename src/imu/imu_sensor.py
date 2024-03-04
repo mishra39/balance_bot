@@ -129,7 +129,7 @@ class IMU_Sensor:
         
         print ("Gx=%.2f" %gyro_corrected[0], u'\u00b0'+ "/s", "\tGy=%.2f" %gyro_corrected[1], u'\u00b0'+ "/s", "\tGz=%.2f" %gyro_corrected[2], u'\u00b0'+ "/s", "\tAx=%.2f g" %accel_corrected[0], "\tAy=%.2f g" %accel_corrected[1], "\tAz=%.2f g" %accel_corrected[2])
         
-    def calibrateGyroscope(self, n=15.0):
+    def calibrateGyroscope(self, t=15.0):
         print("Calibrating gyro, make sure bot is level!")
         print("Starting gyro calibration for %.2f seconds." %n)
         gyro_x = 0.0
@@ -138,11 +138,13 @@ class IMU_Sensor:
         
         t_start = time.time()
         t_elapsed = 0.0
-        while (t_elapsed < n):
+        n = 0
+        while (t_elapsed < t):
             gyro_x += self.read_raw_data(GYRO_XOUT_H)
             gyro_y += self.read_raw_data(GYRO_YOUT_H)
             gyro_z += self.read_raw_data(GYRO_ZOUT_H)
             t_elapsed = time.time() - t_start
+            n += 1
         
         
         # compute average error
@@ -157,7 +159,7 @@ class IMU_Sensor:
         # Clear all axis
         uncal_gyro.cla()
         
-    def calibrateAccelerometer(self, n=15.0):
+    def calibrateAccelerometer(self, t=15.0):
         print("Accelerometer gyro, make sure bot is level!")
         print("Starting accelerometer calibration for %.2f seconds." %n)
         accel_x = 0.0
@@ -166,11 +168,13 @@ class IMU_Sensor:
 
         t_start = time.time()
         t_elapsed = 0.0
-        while (t_elapsed < n):
+        n = 0
+        while (t_elapsed < t):
             accel_x += self.read_raw_data(ACCEL_XOUT_H)
             accel_y += self.read_raw_data(ACCEL_YOUT_H)
             accel_z += self.read_raw_data(ACCEL_ZOUT_H)
             t_elapsed = time.time() - t_start
+            n += 1
         
         
         # compute average error
